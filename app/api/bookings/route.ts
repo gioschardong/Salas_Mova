@@ -33,7 +33,12 @@ function isValidBookingInput(body: unknown): body is BookingInput {
 
 async function readSupabaseError(response: Response, fallbackMessage: string): Promise<string> {
   try {
-    const data = (await response.json()) as { message?: string; error?: string }
+    const data = (await response.json()) as { code?: string; message?: string; error?: string }
+
+    if (data.code === '23505') {
+      return 'Este horário já está reservado.'
+    }
+
     return data.message || data.error || fallbackMessage
   } catch {
     return fallbackMessage
@@ -104,7 +109,10 @@ export async function POST(request: Request) {
 
     if (!insertResponse.ok) {
       const message = await readSupabaseError(insertResponse, 'Não foi possível criar a reserva.')
-      return NextResponse.json({ error: message }, { status: insertResponse.status })
+      return NextResponse.json(
+        { error: message },
+        { status: message === 'Este horário já está reservado.' ? 409 : insertResponse.status }
+      )
     }
 
     const [createdBooking] = await insertResponse.json()

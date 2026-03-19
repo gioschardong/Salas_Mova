@@ -8,7 +8,7 @@ import { BookingModal } from '@/components/booking-modal'
 import { BookingHistory } from '@/components/booking-history'
 import { toast } from '@/hooks/use-toast'
 import { useBookings } from '@/hooks/use-bookings'
-import { type ShiftKey, type Booking } from '@/lib/booking-service'
+import { BookingServiceError, type ShiftKey, type Booking } from '@/lib/booking-service'
 import { cn } from '@/lib/utils'
 
 type Tab = 'schedule' | 'history'
@@ -26,6 +26,7 @@ export default function HomePage() {
   const {
     bookings,
     isLoading,
+    refresh,
     getSlotBooking,
     createBooking,
     deleteBooking,
@@ -50,9 +51,19 @@ export default function HomePage() {
       })
       setModalState(null)
     } catch (error) {
+      if (error instanceof BookingServiceError && error.status === 409) {
+        await refresh()
+        setModalState(null)
+      }
+
       toast({
         title: 'Não foi possível criar a reserva',
-        description: error instanceof Error ? error.message : 'Tente novamente.',
+        description:
+          error instanceof BookingServiceError && error.status === 409
+            ? 'Esse horário acabou de ser reservado por outra pessoa. A agenda foi atualizada.'
+            : error instanceof Error
+              ? error.message
+              : 'Tente novamente.',
         variant: 'destructive',
       })
     }

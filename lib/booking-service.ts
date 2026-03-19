@@ -36,6 +36,16 @@ export function canCancelBooking(date: string, shift: ShiftKey, now = new Date()
   return bookingStart.getTime() - now.getTime() >= 24 * 60 * 60 * 1000
 }
 
+export class BookingServiceError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number
+  ) {
+    super(message)
+    this.name = 'BookingServiceError'
+  }
+}
+
 async function parseResponse<T>(response: Response): Promise<T> {
   if (response.ok) {
     return response.json() as Promise<T>
@@ -51,7 +61,7 @@ async function parseResponse<T>(response: Response): Promise<T> {
     // Ignora erros de parsing e mantém a mensagem padrão.
   }
 
-  throw new Error(errorMessage)
+  throw new BookingServiceError(errorMessage, response.status)
 }
 
 export const bookingService = {
