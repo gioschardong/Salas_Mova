@@ -18,21 +18,8 @@ export const metadata: Metadata = {
   title: 'Clínica Mova - Agendamento de Salas',
   description: 'Sistema de agendamento de salas da Clínica Mova',
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
+    icon: '/374900137_633392865443492_2609020395948165753_n.jpg',
+    apple: '/374900137_633392865443492_2609020395948165753_n.jpg',
   },
 }
 
