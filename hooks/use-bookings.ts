@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { bookingService, type Booking, type BookingInput, type ShiftKey } from '@/lib/booking-service'
+import { supabaseBrowser } from '@/lib/supabase-browser'
 
 export function useBookings() {
   const [bookings, setBookings] = useState<Booking[]>([])
@@ -19,6 +20,27 @@ export function useBookings() {
 
   useEffect(() => {
     void refresh()
+  }, [refresh])
+
+  useEffect(() => {
+    const channel = supabaseBrowser
+      .channel('bookings-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'bookings',
+        },
+        () => {
+          void refresh()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      void supabaseBrowser.removeChannel(channel)
+    }
   }, [refresh])
 
   const getBookingsForDate = useCallback((date: string) => {
