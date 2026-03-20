@@ -1,16 +1,17 @@
 import { createClient } from '@supabase/supabase-js'
 
-function requirePublicEnv(name: 'NEXT_PUBLIC_SUPABASE_URL' | 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY'): string {
-  const value = process.env[name]
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 
-  if (!value) {
-    throw new Error(`Variável de ambiente ausente: ${name}`)
-  }
+if (!supabaseUrl) {
+  throw new Error('Variável de ambiente ausente: NEXT_PUBLIC_SUPABASE_URL')
+}
 
-  return value
+if (!supabasePublishableKey) {
+  throw new Error('Variável de ambiente ausente: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY')
 }
 
 export const supabaseBrowser = createClient(
-  requirePublicEnv('NEXT_PUBLIC_SUPABASE_URL'),
-  requirePublicEnv('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY')
+  supabaseUrl,
+  supabasePublishableKey
 )
