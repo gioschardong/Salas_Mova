@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import {
+  canBookShift,
   SHIFTS,
   type BookingInput,
   type ShiftKey,
@@ -74,6 +75,13 @@ export async function POST(request: Request) {
 
     if (!isValidBookingInput(body)) {
       return NextResponse.json({ error: 'Dados de reserva inválidos.' }, { status: 400 })
+    }
+
+    if (!canBookShift(body.date, body.shift)) {
+      return NextResponse.json(
+        { error: 'Não é mais possível reservar esse turno para o dia atual.' },
+        { status: 409 }
+      )
     }
 
     const duplicateResponse = await fetch(

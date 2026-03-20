@@ -1,8 +1,8 @@
 'use client'
 
-import { ROOMS, SHIFTS, type ShiftKey, type Booking } from '@/lib/booking-service'
+import { ROOMS, SHIFTS, canBookShift, type ShiftKey, type Booking } from '@/lib/booking-service'
 import { cn } from '@/lib/utils'
-import { Check, X } from 'lucide-react'
+import { Ban, Check, X } from 'lucide-react'
 
 interface RoomGridProps {
   date: string
@@ -31,18 +31,25 @@ export function RoomGrid({ date, getSlotBooking, onSlotClick }: RoomGridProps) {
           {shifts.map(([shiftKey]) => {
             const booking = getSlotBooking(room.id, date, shiftKey)
             const isBooked = !!booking
+            const canBook = canBookShift(date, shiftKey)
             
             return (
               <button
                 key={`${room.id}-${shiftKey}`}
-                onClick={() => onSlotClick(room.id, shiftKey, booking)}
+                onClick={() => {
+                  if (!canBook && !booking) return
+                  onSlotClick(room.id, shiftKey, booking)
+                }}
+                disabled={!canBook && !booking}
                 className={cn(
                   'h-14 rounded-lg flex items-center justify-center transition-all',
-                  'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
-                  'active:scale-95',
+                  'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-75',
+                  !(!canBook && !booking) && 'active:scale-95',
                   isBooked 
-                    ? 'bg-destructive/15 border-2 border-destructive/30 text-destructive' 
-                    : 'bg-emerald-500/15 border-2 border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/25'
+                    ? 'bg-destructive/15 border-2 border-destructive/30 text-destructive'
+                    : canBook
+                      ? 'bg-emerald-500/15 border-2 border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/25'
+                      : 'bg-muted border-2 border-border text-muted-foreground'
                 )}
               >
                 {isBooked ? (
@@ -52,6 +59,8 @@ export function RoomGrid({ date, getSlotBooking, onSlotClick }: RoomGridProps) {
                       {booking.responsibleName.split(' ')[0]}
                     </span>
                   </div>
+                ) : !canBook ? (
+                  <Ban className="h-4 w-4" />
                 ) : (
                   <Check className="h-5 w-5" />
                 )}
@@ -69,6 +78,10 @@ export function RoomGrid({ date, getSlotBooking, onSlotClick }: RoomGridProps) {
         <div className="flex items-center gap-2">
           <div className="h-4 w-4 rounded bg-destructive/15 border border-destructive/30" />
           <span>Reservado</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-4 w-4 rounded bg-muted border border-border" />
+          <span>Encerrado</span>
         </div>
       </div>
     </div>

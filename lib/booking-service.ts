@@ -31,9 +31,30 @@ const SHIFT_START_HOURS: Record<ShiftKey, string> = {
   evening: '18:00',
 }
 
+const SHIFT_END_HOURS: Record<ShiftKey, string> = {
+  morning: '12:00',
+  afternoon: '17:00',
+  evening: '22:00',
+}
+
 export function canCancelBooking(date: string, shift: ShiftKey, now = new Date()): boolean {
   const bookingStart = new Date(`${date}T${SHIFT_START_HOURS[shift]}:00`)
   return bookingStart.getTime() - now.getTime() >= 24 * 60 * 60 * 1000
+}
+
+export function canBookShift(date: string, shift: ShiftKey, now = new Date()): boolean {
+  const today = now.toISOString().split('T')[0]
+
+  if (date < today) {
+    return false
+  }
+
+  if (date > today) {
+    return true
+  }
+
+  const shiftEnd = new Date(`${date}T${SHIFT_END_HOURS[shift]}:00`)
+  return now.getTime() < shiftEnd.getTime()
 }
 
 export class BookingServiceError extends Error {
