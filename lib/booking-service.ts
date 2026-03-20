@@ -37,13 +37,20 @@ const SHIFT_END_HOURS: Record<ShiftKey, string> = {
   evening: '22:00',
 }
 
+function getLocalDateString(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 export function canCancelBooking(date: string, shift: ShiftKey, now = new Date()): boolean {
   const bookingStart = new Date(`${date}T${SHIFT_START_HOURS[shift]}:00`)
   return bookingStart.getTime() - now.getTime() >= 24 * 60 * 60 * 1000
 }
 
 export function canBookShift(date: string, shift: ShiftKey, now = new Date()): boolean {
-  const today = now.toISOString().split('T')[0]
+  const today = getLocalDateString(now)
 
   if (date < today) {
     return false
